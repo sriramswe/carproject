@@ -47,7 +47,9 @@ export default function Index() {
                       multiple search criteria: Maker, Model, Year, Price Range, Car
                       Type, etc...
                     </p>
+                    <Link to="/search">
                     <button className="btn btn-hero-slider">Find the car</button>
+                    </Link>
                   </div>
                 </div>
                 <div className="slide-image">
@@ -74,7 +76,8 @@ export default function Index() {
                       Submit your car in our user friendly interface, describe it,
                       upload photos and the perfect buyer will find it...
                     </p>
-                    <button className="btn btn-hero-slider">Add Your Car</button>
+                    <Link to="/create">
+                    <button className="btn btn-hero-slider">Add Your Car</button></Link>
                   </div>
                 </div>
                 <div className="slide-image">

@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
   --primary-font: "Ubuntu", sans-serif;
@@ -1702,3 +1700,100 @@ a.pagination-item:hover {
   border-color: #dc3545;
   box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
 }
+/* --- Chat Dashboard Styles --- */
+.chat-dashboard {
+  display: flex;
+  flex-direction: column;
+  height: 500px; /* Example height */
+  overflow: hidden;
+}
+
+.chat-header {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.chat-messages {
+  flex-grow: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.message {
+  padding: 0.5rem 1rem;
+  border-radius: 18px;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.message.sent {
+  background-color: var(--primary-color);
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.message.received {
+  background-color: #f1f0f0;
+  color: #333;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.message .timestamp {
+    display: block;
+    font-size: 0.7rem;
+    color: #999;
+    margin-top: 4px;
+}
+.message.sent .timestamp {
+    color: #eee;
+}
+
+.chat-input-area {
+  display: flex;
+  padding: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.chat-input-area input {
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  border-radius: 20px;
+  margin-right: 0.5rem;
+}
+
+.chat-input-area button {
+  border-radius: 20px;
+  padding: 0.5rem 1.5rem;
+  border: none;
+  background-color: var(--primary-color);
+  color: white;
+  cursor: pointer;
+}
+
+.chat-input-area button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+.profile-content-section {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+.status-online { color: green; font-size: 0.8rem; }
+.status-offline { color: red; font-size: 0.8rem; }

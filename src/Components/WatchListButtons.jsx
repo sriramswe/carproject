@@ -4,7 +4,6 @@ import { FavouriteContext } from "./FavouriteContext";
 export default function WatchlistButtons({ carId }) {
   const { favourites, toggleFavourite } = useContext(FavouriteContext);
   const isFavourite = favourites.includes(carId);
-
   return (
     <div className="watchlist-buttons">
       {/* ❤️ Favourite Toggle Button */}

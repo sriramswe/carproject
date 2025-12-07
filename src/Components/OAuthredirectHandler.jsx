@@ -14,7 +14,7 @@ const OAuth2RedirectHandler = () => {
       // If a token is found, call the login function from the context
       login(token);
     } else {
-      // If no token, something went wrong. Redirect to login with an error.
+
       navigate('/login', { state: { error: 'OAuth2 login failed. Please try again.' } });
     }
   }, [searchParams, login, navigate]);

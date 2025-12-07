@@ -5,11 +5,8 @@ import { useAuth } from "./AuthContext";
 export default function Header() {
   const { isAuthenticated, user, logout } = useAuth();
   const location = useLocation();
-
-    
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
-
   // Effect to close any open menus when the user navigates to a new page
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -20,7 +17,6 @@ export default function Header() {
     e.preventDefault();
     logout();
   };
-
   return (
     <Fragment>
       {/* Overlay for closing menus when clicking outside */}
@@ -115,6 +111,10 @@ export default function Header() {
               </>
             ) : (
               <>
+              <Link to="/search" className="btn btn-primary btn-search">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" style={{ width: "18px", marginRight: "4px" }}><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+              Find Car
+            </Link>
                 <Link to="/signup" className="btn btn-primary btn-signup">
                   Sign Up
                 </Link>

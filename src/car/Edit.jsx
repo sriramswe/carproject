@@ -10,6 +10,22 @@ const generateYearOptions = () => {
     return years;
 };
 
+// This is the shape of our state, matching the CarCreateDTO
+const initialCarState = {
+    makerName: "",
+    modelName: "",
+    year: "",
+    carTypeName: "",
+    price: "",
+    mileage: "",
+    fuelTypeName: "",
+    stateName: "",
+    cityName: "",
+    description: "",
+    phoneno: "",
+    features: {}
+};
+
 export default function Edit() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -17,10 +33,11 @@ export default function Edit() {
     const { token } = useAuth();
     const fileInputRef = useRef(null);
 
-    const [carData, setCarData] = useState(null);
+    const [carData, setCarData] = useState(initialCarState); // Use a consistent initial state
     const [carImages, setCarImages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [formErrors, setFormErrors] = useState({});
 
     useEffect(() => {
         const carId = parseInt(id);
@@ -31,21 +48,23 @@ export default function Edit() {
             setLoading(true);
             const data = await getCarById(carId);
             if (data) {
+                // Map the fetched data to our consistent state shape
                 setCarData({
-                    makerId: data.model?.maker?.id || "",
-                    modelId: data.model?.id || "",
+                    makerName: data.model.maker.name || "",
+                    modelName: data.model.model || "",
                     year: data.year || "",
-                    carTypeId: data.carType?.id || "",
+                    carTypeName: data.carType.name || "",
                     price: data.price || "",
                     mileage: data.mileage || "",
-                    fuelType: data.fuelType || "",
-                    stateId: data.city?.state?.id || "",
-                    cityId: data.city?.id || "",
+                    fuelTypeName: data.fuelType|| "",
+                    stateName: data.city.state.name || "",
+                    cityName: data.city.name || "",
                     description: data.description || "",
-                    phoneno: data.owner?.phone || "",
-                    features: { ...(data.features || {}) }
+                    phoneNo: data.owner.phone || "", // Standardized to 'phoneno'
+                    features: data.features || {}
                 });
-                setCarImages(data.images || []);
+                // The images have their own DTO shape, which is fine
+                setCarImages(data.imageUrls ? data.imageUrls.map((url, i) => ({ id: i, url })) : []);
             } else {
                 setError("Car not found.");
             }
@@ -64,39 +83,35 @@ export default function Edit() {
         }
     };
 
-    // Validation function (similar to Create)
-    const validateForm = (data) => {
-        const newErrors = {};
-        if (!data.makerId) newErrors.makerId = "Maker is required.";
-        if (!data.modelId) newErrors.modelId = "Model is required.";
-        if (!data.year) newErrors.year = "Year is required.";
-        if (!data.carTypeId) newErrors.carTypeId = "Car Type is required.";
-        if (!data.fuelType) newErrors.fuelType = "Fuel Type is required.";
-        if (!data.stateId) newErrors.stateId = "State is required.";
-        if (!data.cityId) newErrors.cityId = "City is required.";
-        if (!data.price) {
-            newErrors.price = "Price is required.";
-        } else if (parseFloat(data.price) <= 0) {
-            newErrors.price = "Price must be a positive number.";
-        }
-        if (!data.mileage) {
-            newErrors.mileage = "Mileage is required.";
-        } else if (parseInt(data.mileage, 10) < 0) {
-            newErrors.mileage = "Mileage cannot be negative.";
-        }
-        if (!data.phoneno) {
-            newErrors.phoneno = "Phone number is required.";
-        }
-        if (!data.description) {
-            newErrors.description = "Description is required.";
-        } else if (data.description.length < 20) {
-            newErrors.description = "Description must be at least 20 characters long.";
-        }
-        return newErrors;
-    };
+    // Validation function remains the same, but we'll use correct field names
+   const validateForm = (data, images) => {
+  const errors = {};
 
-    const [formErrors, setFormErrors] = useState({});
+  if (!data.makerName) errors.makerName = "Maker is required.";
+  if (!data.modelName) errors.modelName = "Model is required.";
+  if (!data.year) errors.year = "Year is required.";
+  if (!data.carTypeName) errors.carTypeName = "Car type required.";
+  if (!data.fuelTypeName) errors.fuelTypeName = "Fuel type required.";
+  if (!data.stateName) errors.stateName = "State required.";
+  if (!data.cityName) errors.cityName = "City required.";
 
+  if (!data.price || parseFloat(data.price) <= 0)
+    errors.price = "Valid price required.";
+
+  if (!data.mileage || parseInt(data.mileage) < 0)
+    errors.mileage = "Valid mileage required.";
+
+  if (!data.phoneno) errors.phoneno = "Phone required.";
+
+  if (!data.description || data.description.length < 20)
+    errors.description = "Description must be 20+ characters.";
+
+  if (images.length === 0) errors.images = "At least 1 image required.";
+
+  return errors;
+};
+
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true); setError(null);
@@ -108,11 +123,9 @@ export default function Edit() {
         }
         const payload = {
             ...carData,
-            year: parseInt(carData.year),
+            year: parseInt(carData.year, 10),
             price: parseFloat(carData.price),
-            mileage: parseInt(carData.mileage),
-            description: String(carData.description).trim(),
-            features: { ...(carData.features || {}) }
+            mileage: parseInt(carData.mileage, 10),
         };
         try {
             const response = await fetch(`http://localhost:8080/api/cars/${id}`, {
@@ -169,9 +182,8 @@ export default function Edit() {
         }
     };
 
-    if (loading && !carData) return <div className="container py-4">Loading Form...</div>;
+    if (loading && !carData.makerName) return <div className="container py-4">Loading Form...</div>;
     if (error) return <div className="container py-4 alert alert-danger">{error}</div>;
-    if (!carData) return <div className="container py-4">Car data could not be loaded.</div>;
 
     return (
         <Fragment>
@@ -182,24 +194,17 @@ export default function Edit() {
                         <div className="form-content">
                             <div className="form-details">
                                 <div className="row">
+                                    {/* --- CORRECTED FIELDS --- */}
                                     <div className="col"><div className="form-group"><label>Maker</label>
-                                        <select name="makerId" value={carData.makerId} onChange={handleChange} required>
-                                            <option value="">Select Maker</option>
-                                            {useCarContext().makers.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                                        </select>
-                                        {formErrors.makerId && <p className="error-message">{formErrors.makerId}</p>}
+                                        <input type="text" name="makerName" value={carData.makerName} onChange={handleChange}/>
+                                        {formErrors.makerName && <p className="error-message">{formErrors.makerName}</p>}
                                     </div></div>
                                     <div className="col"><div className="form-group"><label>Model</label>
-                                        <select name="modelId" value={carData.modelId} onChange={handleChange} required>
-                                            <option value="">Select Model</option>
-                                            {useCarContext().models.filter(model => model.maker?.id === parseInt(carData.makerId)).map(model => (
-                                                <option key={model.id} value={model.id}>{model.model}</option>
-                                            ))}
-                                        </select>
-                                        {formErrors.modelId && <p className="error-message">{formErrors.modelId}</p>}
+                                        <input type="text" name="modelName" value={carData.modelName} onChange={handleChange} />
+                                        {formErrors.modelName && <p className="error-message">{formErrors.modelName}</p>}
                                     </div></div>
                                     <div className="col"><div className="form-group"><label>Year</label>
-                                        <select name="year" value={carData.year} onChange={handleChange} required>
+                                        <select name="year" value={carData.year} onChange={handleChange} >
                                             <option value="">Year</option>
                                             {generateYearOptions().map(y => <option key={y} value={y}>{y}</option>)}
                                         </select>
@@ -207,59 +212,52 @@ export default function Edit() {
                                     </div></div>
                                 </div>
                                 <div className="form-group"><label>Car Type</label>
-                                    <select name="carTypeId" value={carData.carTypeId} onChange={handleChange} required>
-                                        <option value="">Select Car Type</option>
-                                        {useCarContext().carTypes.map(type => <option key={type.id} value={type.id}>{type.name}</option>)}
-                                    </select>
-                                    {formErrors.carTypeId && <p className="error-message">{formErrors.carTypeId}</p>}
+                                    <input type="text" name="carTypeName" value={carData.carTypeName} onChange={handleChange}/>
+                                    {formErrors.carTypeName && <p className="error-message">{formErrors.carTypeName}</p>}
+                                </div>
+                                 <div className="form-group"><label>Phone</label>
+                                    <input type="text" name="phoneNo" value={carData.phoneNo} onChange={handleChange}/>
+                                    {formErrors.phoneNo && <p className="error-message">{formErrors.phoneNo}</p>}
                                 </div>
                                 <div className="row">
                                     <div className="col"><div className="form-group"><label>Price ($)</label>
-                                        <input type="number" name="price" placeholder="e.g., 25000" value={carData.price} onChange={handleChange} required />
+                                        <input type="number" name="price" placeholder="e.g., 25000" value={carData.price} onChange={handleChange}/>
                                         {formErrors.price && <p className="error-message">{formErrors.price}</p>}
                                     </div></div>
+                                    
                                     <div className="col"><div className="form-group"><label>Mileage</label>
-                                        <input type="number" name="mileage" placeholder="e.g., 50000" value={carData.mileage} onChange={handleChange} required />
+                                        <input type="number" name="mileage" placeholder="e.g., 50000" value={carData.mileage} onChange={handleChange} />
                                         {formErrors.mileage && <p className="error-message">{formErrors.mileage}</p>}
                                     </div></div>
                                 </div>
                                 <div className="row">
                                     <div className="col"><div className="form-group"><label>State/Region</label>
-                                        <select name="stateId" value={carData.stateId} onChange={handleChange} required>
-                                            <option value="">Select State</option>
-                                            {useCarContext().states.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                                        </select>
-                                        {formErrors.stateId && <p className="error-message">{formErrors.stateId}</p>}
+                                        <input type="text" name="stateName" value={carData.stateName} onChange={handleChange} />
+                                        {formErrors.stateName && <p className="error-message">{formErrors.stateName}</p>}
                                     </div></div>
                                     <div className="col"><div className="form-group"><label>City</label>
-                                        <select name="cityId" value={carData.cityId} onChange={handleChange} required>
-                                            <option value="">Select City</option>
-                                            {useCarContext().cities.filter(city => city.state?.id === parseInt(carData.stateId)).map(city => (
-                                                <option key={city.id} value={city.id}>{city.name}</option>
-                                            ))}
-                                        </select>
-                                        {formErrors.cityId && <p className="error-message">{formErrors.cityId}</p>}
+                                        <input type="text" name="cityName" value={carData.cityName} onChange={handleChange} />
+                                        {formErrors.cityName && <p className="error-message">{formErrors.cityName}</p>}
                                     </div></div>
                                 </div>
                                 <div className="form-group"><label>Fuel Type</label>
-                                    <select name="fuelType" value={carData.fuelType} onChange={handleChange} required>
-                                        <option value="">Select Fuel Type</option>
-                                        {useCarContext().fuelTypes.map(fuel => <option key={fuel.id} value={fuel.name}>{fuel.name}</option>)}
-                                    </select>
-                                    {formErrors.fuelType && <p className="error-message">{formErrors.fuelType}</p>}
+                                    <input type="text" name="fuelTypeName" value={carData.fuelTypeName} onChange={handleChange} />
+                                    {formErrors.fuelTypeName && <p className="error-message">{formErrors.fuelTypeName}</p>}
                                 </div>
+                                {/* --- END OF CORRECTED FIELDS --- */}
                                 <div className="form-group"><label>Detailed Description</label>
-                                    <textarea name="description" value={carData.description} onChange={handleChange} rows="6" required></textarea>
+                                    <textarea name="description" value={carData.description} onChange={handleChange} rows="6"></textarea>
                                     {formErrors.description && <p className="error-message">{formErrors.description}</p>}
                                 </div>
                                 <div className="form-group"><label>Features</label><div className="row">{Object.keys(carData.features).map(key => (<div className="col" key={key}><label className="checkbox"><input type="checkbox" name={`feature_${key}`} checked={!!carData.features[key]} onChange={handleChange} />{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</label></div>))}</div></div>
                             </div>
-                            <div className="form-images">
+                             <div className="form-images">
                                 <label className="form-group-label">Manage Images</label>
                                 <div className="car-form-images">
                                     {carImages.map(image => (
                                         <div key={image.id} className="car-form-image-preview">
-                                            <img src={`http://localhost:8080${image.imagePath}`} alt={`Car image ${image.id}`} />
+                                            {/* CORRECTED: Image URL handling */}
+                                            <img src={image.url.startsWith('http') ? image.url : `http://localhost:8080${image.url}`} alt={`Car image ${image.id}`} />
                                             <button type="button" className="delete-image-btn" title="Delete Image" onClick={() => handleImageDelete(image.id)}>×</button>
                                         </div>
                                     ))}

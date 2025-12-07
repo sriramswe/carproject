@@ -1,9 +1,14 @@
+// in pages/PasswordResetConfirm.jsx
 import { useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { Link } from "react-router-dom"; // You forgot this import
 
-export default function PasswordReset() {
-  const [email, setEmail] = useState("");
+export default function PasswordResetConfirm() {
+  const { token } = useParams(); // Get token from the URL
+  const navigate = useNavigate();
+
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -12,59 +17,57 @@ export default function PasswordReset() {
     setMessage("");
     setError("");
 
+    if (password !== confirmPassword) {
+      setError("❌ Passwords do not match.");
+      return;
+    }
+
     try {
-      const res = await axios.post("http://localhost:8080/api/password-reset/request", {
-        email,
-      });
-      setMessage("✅ Reset email sent. Check your inbox.");
+      await axios.post(
+        "http://localhost:8080/api/password-reset/confirm",
+        { token, newPassword: password },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      setMessage("✅ Password has been reset successfully! You can now log in.");
+      setTimeout(() => navigate('/login'), 3000); // Redirect to login after 3 seconds
     } catch (err) {
-      setError("❌ Failed to send reset email. Please check the email and try again.");
+      setError(err.response?.data || "❌ Failed to reset password. The link may be invalid or expired.");
     }
   };
 
   return (
     <main>
       <div className="container-small page-login">
-        <div className="flex" style={{ gap: "5rem" }}>
-          <div className="auth-page-form">
-            <div className="text-center">
-              <a href="/">
-                <img src="/img/logoipsum-265.svg" alt="Logo" />
-              </a>
+        <div className="auth-page-form">
+          <h1 className="auth-page-title">Set Your New Password</h1>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <input
+                type="password"
+                placeholder="New Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </div>
-            <h1 className="auth-page-title">Request Password Reset</h1>
+            <div className="form-group">
+              <input
+                type="password"
+                placeholder="Confirm New Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
 
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <input
-                  type="email"
-                  placeholder="Your Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
+            <button className="btn btn-primary btn-login w-full">
+              Reset Password
+            </button>
 
-              <button className="btn btn-primary btn-login w-full">
-                Request password reset
-              </button>
-
-              {message && <div className="alert alert-success mt-2">{message}</div>}
-              {error && <div className="alert alert-danger mt-2">{error}</div>}
-
-              <div className="login-text-dont-have-account">
-                Already have an account? - <Link to="/login">Click here to login</Link>
-              </div>
-            </form>
-          </div>
-
-          <div className="auth-page-image">
-            <img
-              src="/img/car-png-39071.png"
-              alt="Decorative car"
-              className="img-responsive"
-            />
-          </div>
+            {message && <div className="alert alert-success mt-2">{message}</div>}
+            {error && <div className="alert alert-danger mt-2">{error}</div>}
+            {message && <div className="login-text-dont-have-account"><Link to="/login">Click here to login</Link></div>}
+          </form>
         </div>
       </div>
     </main>

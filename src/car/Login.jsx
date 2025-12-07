@@ -157,7 +157,7 @@ export default function LoginPage() {
             </div>
             
             <div className="form-group flex items-center justify-between">
-              <Link to="/pr" className="text-primary">Forgot password?</Link>
+              <Link to="/password-reset/confirm/:token" className="text-primary">Forgot password?</Link>
             </div>
             
             <button type="submit" className="btn btn-primary w-full" disabled={loading || !isFormValid}>

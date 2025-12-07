@@ -138,12 +138,13 @@ export default function View() {
                   <tr><th>Year</th><td>{car.year}</td></tr>
                   {/* <tr><th>Car Type</th><td>{car.carType?.name}</td></tr> This isn't in the DTO */}
                   <tr><th>Fuel Type</th><td>{car.fuelType}</td></tr>
+                             <tr><th>mileage</th><td>{car.mileage}</td></tr>
                 </tbody>
               </table>
 
               <hr />
               <div className="flex gap-1 my-medium">
-                <img src="/img/avatar.png" alt="Owner" className="car-details-owner-image" />
+                <img src={car.owner.avatarPath} alt="Owner" className="car-details-owner-image" />
                 <div>
                   {/* ✅ FIX: Access ownerName from DTO */}
                   <h3 className="car-details-owner">{car.owner?.username|| "Unknown Owner"}</h3>

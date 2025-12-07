@@ -46,10 +46,6 @@ useEffect(() => {
       localStorage.removeItem("jwt_token");
     }
 }, [token]);
-
-
-
-
   const login = (jwtToken) => {
     setToken(jwtToken);
     console.log(token);

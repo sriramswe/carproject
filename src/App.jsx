@@ -6,9 +6,8 @@ import { AuthProvider } from "./Components/AuthContext";
 import { CarProvider } from "./Components/CarContext";
 import { FavouriteProvider } from "./Components/FavouriteContext";
 import ProtectedRoute from "./Components/ProductRoutes";
-import {ToastContainer} from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { toast } from "react-toastify";
 
 import Header from "./Components/Header";
 import Index from "./car/index";
@@ -23,25 +22,26 @@ import PasswordReset from "./car/password-reset";
 import Mycar from "./car/Mycars";
 import  Profile from  "./car/profile";
 import OAuth2RedirectHandler from "./Components/OAuthredirectHandler";
+import PasswordResetConfirm from "./car/password-reset";
 
 function App() {
   return (
     <BrowserRouter>
-     <ToastContainer  theme="green" position="top-center"/>
+<ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored"/>
       <AuthProvider>
         <CarProvider>
           <FavouriteProvider>
             <Header />
             <Routes>
               <Route path="/" element={
-                <ProtectedRoute>
+                
                   <Index />
-                </ProtectedRoute>
+              
               } />
               <Route path="/view/:id" element={
-                <ProtectedRoute>
+       
                   <View />
-                </ProtectedRoute>
+             
               } />
               <Route path="/edit/:id" element={
                 <ProtectedRoute>
@@ -49,9 +49,9 @@ function App() {
                 </ProtectedRoute>
               } />
               <Route path="/search" element={
-                <ProtectedRoute>
+              
                   <Search />
-                </ProtectedRoute>
+        
               } />
                <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
@@ -61,9 +61,7 @@ function App() {
               <Route path="/watchlist" element={
                 <ProtectedRoute><WatchList /></ProtectedRoute>
               } />
-              <Route path="/pr" element={
-                <PasswordReset />
-              } />
+              <Route path="/password-reset/confirm/:token" element={<PasswordResetConfirm />} />
               <Route path="/mycar" element={
                 <ProtectedRoute><Mycar /></ProtectedRoute>
               } />

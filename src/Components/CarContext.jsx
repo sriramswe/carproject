@@ -12,10 +12,8 @@ const uniqueById = (arr) => {
 export const CarProvider = ({ children }) => {
     // ✅ 2. Get the authentication token from the AuthContext
     const { token } = useAuth();
-
     const [cars, setCars] = useState([]);
     const [loading, setLoading] = useState(true);
-
     // State for all the unique lookup data for forms
     const [makers, setMakers] = useState([]);
     const [models, setModels] = useState([]);
@@ -23,27 +21,21 @@ export const CarProvider = ({ children }) => {
     const [cities, setCities] = useState([]);
     const [fuelTypes, setFuelTypes] = useState([]);
     const [carTypes, setCarTypes] = useState([]);
-
     useEffect(() => {
         const fetchAllCars = async () => {
             setLoading(true);
             try {
-               
                 const res = await fetch("http://localhost:8080/api/cars");
                 if (!res.ok) throw new Error("Failed to fetch car list");
-                
                 const data = await res.json();
-
                 if (Array.isArray(data)) {
                     setCars(data);
-
                     // Derive dropdown data from the full car list
                     setMakers(uniqueById(data.map(car => car.model?.maker)));
                     setModels(uniqueById(data.map(car => car.model)));
                     setStates(uniqueById(data.map(car => car.city?.state)));
                     setCities(uniqueById(data.map(car => car.city)));
                     setCarTypes(uniqueById(data.map(car => car.carType)));
-                    
                     const uniqueFuelTypeNames = [...new Set(data.map(car => car.fuelType).filter(Boolean))];
                     setFuelTypes(uniqueFuelTypeNames.map(name => ({ id: name, name: name })));
                 }
